@@ -7,25 +7,28 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class ApiConsumerTask extends AsyncTask<JSONObject, Integer, Boolean> {
     private final static String TAG = ApiConsumerTask.class.getSimpleName();
-    private DataStore mDataStore;
+    private ArrayList<String> mUrls;
     private ApiConsumerListener mListener;
 
-    public ApiConsumerTask(DataStore dataStore, ApiConsumerListener listener) {
-        mDataStore = dataStore;
+    public ApiConsumerTask(ApiConsumerListener listener) {
         mListener = listener;
     }
 
     @Override
     protected void onPostExecute(Boolean success) {
-        mListener.onApiConsumerFinished(success);
+        mListener.onApiConsumerFinished(success, mUrls);
     }
 
     @Override
     protected Boolean doInBackground(JSONObject... params) {
         JSONObject jsonRoot = params[0];
 
+        mUrls = new ArrayList<>();
         try {
             // Check the JSON contains an `images` key
             if(!jsonRoot.has("images")) {
@@ -36,7 +39,7 @@ public class ApiConsumerTask extends AsyncTask<JSONObject, Integer, Boolean> {
 
             for(int i = 0; i < jsonImages.length(); i++) {
                 String url = jsonImages.getString(i);
-                mDataStore.addUrl(url);
+                mUrls.add(url);
             }
 
             return true;
@@ -48,6 +51,6 @@ public class ApiConsumerTask extends AsyncTask<JSONObject, Integer, Boolean> {
     }
 
     public interface ApiConsumerListener {
-        void onApiConsumerFinished(boolean success);
+        void onApiConsumerFinished(boolean success, List<String> urls);
     }
 }

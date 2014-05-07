@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.android.volley.Response;
@@ -12,26 +13,30 @@ import com.android.volley.toolbox.JsonObjectRequest;
 
 import org.json.JSONObject;
 
+import java.util.List;
 
 public class MainActivity extends ActionBarActivity implements ApiConsumerTask.ApiConsumerListener {
 
-    private DataStore mDataStore;
+    private ImagesAdapter mAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mDataStore = new DataStore();
+        mAdapter = new ImagesAdapter(this, null);
 
         mTextView = (TextView) findViewById(R.id.text1);
+
+        ListView listView = (ListView) findViewById(R.id.list1);
+        listView.setAdapter(mAdapter);
 
         // Create a new JsonObjectRequest.
         JsonObjectRequest request = new JsonObjectRequest("http://cblunt.github.io/blog-android-volley/response.json", null,
                                                           new Response.Listener<JSONObject>() {
                                                               @Override
                                                               public void onResponse(JSONObject response) {
-                                                                  new ApiConsumerTask(mDataStore, MainActivity.this).execute(response);
+                                                                  new ApiConsumerTask(MainActivity.this).execute(response);
                                                               }
                                                           },
                                                           new Response.ErrorListener() {
@@ -70,7 +75,8 @@ public class MainActivity extends ActionBarActivity implements ApiConsumerTask.A
     }
 
     @Override
-    public void onApiConsumerFinished(boolean success) {
-        mTextView.setText("Result was: " + success + "\n" + mDataStore);
+    public void onApiConsumerFinished(boolean success, List<String> urls) {
+        mAdapter.changeUrls(urls);
     }
+
 }
