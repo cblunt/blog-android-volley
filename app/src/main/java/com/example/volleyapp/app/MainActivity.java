@@ -12,12 +12,17 @@ import com.android.volley.toolbox.JsonObjectRequest;
 
 import org.json.JSONObject;
 
-public class MainActivity extends ActionBarActivity {
+
+public class MainActivity extends ActionBarActivity implements ApiConsumerTask.ApiConsumerListener {
+
+    private DataStore mDataStore;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        mDataStore = new DataStore();
 
         mTextView = (TextView) findViewById(R.id.text1);
 
@@ -26,7 +31,7 @@ public class MainActivity extends ActionBarActivity {
                                                           new Response.Listener<JSONObject>() {
                                                               @Override
                                                               public void onResponse(JSONObject response) {
-                                                                  mTextView.setText(response.toString());
+                                                                  new ApiConsumerTask(mDataStore, MainActivity.this).execute(response);
                                                               }
                                                           },
                                                           new Response.ErrorListener() {
@@ -62,5 +67,10 @@ public class MainActivity extends ActionBarActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onApiConsumerFinished(boolean success) {
+        mTextView.setText("Result was: " + success + "\n" + mDataStore);
     }
 }
